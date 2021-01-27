@@ -11,6 +11,7 @@ import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.widget.TextView;
 
 import java.util.Random;
 
@@ -26,12 +27,13 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     private float vy = 0;
     private int px = 50;
     private int py = 50;
-
     private static final String TAG = "EDUIB"; // tag
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        setContentView(R.layout.activity_main);
 
         sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
         // chęć korzystania z czujników sprzętowych
@@ -84,10 +86,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             }
         }
 
-
         gameView = new RectangleView(this, a, b, x, y);
         // setContentView(gameView);
-
 
         RectangleView[] rectTable = new RectangleView[a.length];
 
@@ -103,6 +103,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     public void onSensorChanged(SensorEvent event) {
         // odczytanie bieżących wskazań
 
+        TextView tvEnd = (TextView) findViewById(R.id.tvText);
+        tvEnd.setText("");
 
         DisplayMetrics displayMetrics = new DisplayMetrics();
         getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
@@ -117,45 +119,53 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
 
         float[] values = event.values;
-        float ax = values[0];
-        float ay = values[1];
-        Log.d(TAG, String.valueOf(ax + " " + ay));
+        int ax = (int) values[0];
+        int ay = (int) values[1];
+        Log.d(TAG, String.valueOf(vx + " " + vy));
+
+        vx -= ax / 3;
+        vy += ay / 3;
 
         for (int i = 0; i < x.length; i++) { //kolizje pacmana z przeszkodami
             if (gameView.getBallX() + 15 >= x[i] && gameView.getBallX() - 15 <= x[i] + a[i] && gameView.getBallY() + 15 >= y[i] && gameView.getBallY() - 15 <= y[i] + b[i]) {
-                vx = 0; //-vx * (float) 1.5; // -vx * 4;
-                vy = 0; //-vy * (float) 1.5; // -vy * 4;
+//                if (Math.abs(values[0]) > Math.abs(values[1])) {
+//                    vx -= 1.5 * vx; //-vx * (float) 1.5; // -vx * 4;
+//                    gameView.setBallX(px);
+//                } else if (Math.abs(values[0]) < Math.abs(values[1])) {
+//                    vy -= 1.5 * vy; //-vy * (float) 1.5; // -vy * 4;
+//                    gameView.setBallY(py);
+//                } else {
+                vx -= 1.1 * vx; //-vx * (float) 1.5; // -vx * 4;
                 gameView.setBallX(px);
+                vy -= 1.1 * vy; //-vy * (float) 1.5; // -vy * 4;
                 gameView.setBallY(py);
+//                }
             }
         }
+
         if (gameView.getBallX() < 15 || gameView.getBallX() > width - 15) { //kolizje pacmana z brzegami ekranu
-            vx = 0; //-vx * (float) 1.5;
+            vx -= 1.5 * vx; //-vx * (float) 1.5;
             gameView.setBallX(px);
         }
         if (gameView.getBallY() < 15 || gameView.getBallY() > height - 15) { //kolizje pacmana z brzegami ekranu
-            vy = 0; //-vy * (float) 1.5;
+            vy -= 1.5 * vy; //-vy * (float) 1.5;
             gameView.setBallY(py);
         }
-
-        gameView.setBallX(gameView.getBallX() + (int) vx); //ruch pacmana
-        gameView.setBallY(gameView.getBallX() + (int) vy);
-
-        vx += ax / 200;
-        vy += ay / 200;
 
         px = gameView.getBallX();
         py = gameView.getBallY();
 
-        RectangleView[] rectTable = new RectangleView[a.length];
+        gameView.setBallX(gameView.getBallX() + (int) vx / 3); //ruch pacmana
+        gameView.setBallY(gameView.getBallY() + (int) vy / 3);
 
-        for (int i = 0; i < a.length; i++) {
-            //rectTable[i] = new RectangleView(this, a, b, x, y);
-            rectTable[i] = gameView;
-            setContentView(rectTable[i]);
+        // (viewWidth - 100), (viewHeight - 100), (viewWidth - 50), (viewHeight - 50)
+
+        if (gameView.getBallX() + 15 >= (width - 100) && gameView.getBallX() - 15 <= (width - 50) && gameView.getBallY() + 15 >= (height - 100) && gameView.getBallY() - 15 <= (height - 50)) {
+            tvEnd.setText("chuj");
         }
-        //setContentView(gameView);
 
+
+        setContentView(gameView);
     }
 
     // metody decydujące o tym, że nie sprawdzamy czujników, kiedy aplikacja nie jest użytkowana

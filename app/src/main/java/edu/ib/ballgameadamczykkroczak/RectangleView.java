@@ -6,6 +6,7 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.view.View;
+import android.widget.TextView;
 
 public class RectangleView extends View {
     private Paint rectPaint;
@@ -21,6 +22,7 @@ public class RectangleView extends View {
     private int ballX = 50;
     private int ballY = 50;
     private Context context;
+    private TextView tvEnd;
 
     public int getBallX() {
         return ballX;
@@ -55,7 +57,6 @@ public class RectangleView extends View {
     }
 
 
-
     public RectangleView(Context context, int[] a, int[] b, int[] x, int[] y) {
         super(context); // wywołanie kostruktora klasy bazowej
         this.x = x;
@@ -80,6 +81,7 @@ public class RectangleView extends View {
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
+        // tvEnd = new TextView(super(context));
 
         for (int i = 0; i < a.length; i++) {
             Rect rect = new Rect(x[i], y[i], x[i] + a[i], y[i] + b[i]);
@@ -88,11 +90,12 @@ public class RectangleView extends View {
         invalidate(); // odświeżenie ekranu
         // przy eskperymentowaniu z przemieszczaniem się kulki
 
+        canvas.drawRect((viewWidth - 100), (viewHeight - 100), (viewWidth - 50), (viewHeight - 50), rectPaint);
+
         rectPaint.setTextSize(32);
         canvas.drawText("START", 20, 30, rectPaint);
 
         canvas.drawCircle(ballX, ballY, radius, ballPaint);
         invalidate(); // odświeżenie ekranu
     }
-
 }
