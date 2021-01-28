@@ -125,7 +125,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         vy += ay / 3;
 
         for (int i = 0; i < pointX.length; i++) { // najechanie piłki na punkt
-            if (gameView.getBallX() >= pointX[i] - 15 && gameView.getBallX() <= pointX[i] + 15 && gameView.getBallY() >= pointY[i] - 15 && gameView.getBallY() <= pointY[i] + 15) { // jeśli pacman najedzie na punkt, punkt znika, a gracz otrzymuje punkt
+            if (gameView.getBallX() >= pointX[i] - 15 && gameView.getBallX() <= pointX[i] + 15 && gameView.getBallY() >= pointY[i] - 15 && gameView.getBallY() <= pointY[i] + 15) { // jeśli piłka najedzie na punkt, punkt znika, a gracz otrzymuje punkt
                 pointX[i] = -100;
                 pointY[i] = -100;
                 score++;
