@@ -21,10 +21,13 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     private SensorManager sensorManager;
     private RectangleView gameView;
     private static float NSS = (float) Math.pow(10, -9); // konwersja na sekundy
-    private int[] a = new int[18];   // długość boku przeszkody
-    private int[] b = new int[18];   // długość boku przeszkody
-    private int[] x = new int[18]; // położenie przeszkody
-    private int[] y = new int[18];
+    private int[] a = new int[25];   // długość boku przeszkody
+    private int[] b = new int[25];   // długość boku przeszkody
+    private int[] x = new int[25]; // położenie przeszkody
+    private int[] y = new int[25];
+    private int[] pointX = new int[30];
+    private int[] pointY = new int[30];
+    private int score = 0; // punkty
     private float vx = 0;
     private float vy = 0;
     private int px = 50;
@@ -36,8 +39,6 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        // setContentView(R.layout.activity_main);
-
         sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
         // chęć korzystania z czujników sprzętowych
         sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
@@ -45,53 +46,66 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
         DisplayMetrics displayMetrics = new DisplayMetrics();
         getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+
         int height = displayMetrics.heightPixels;
         int width = displayMetrics.widthPixels;
 
-        boolean flaga = false;
-        do { //pętla ustalająca współrzędne pierwszego elementu labiryntu
+        boolean flagDraw = false;
+        do { // pętla ustalająca współrzędne pierwszego elementu labiryntu
             int r = (int) (Math.random() * 2);
 
-            if (r == 1) { //losowa orientacja prostokątnej przeszkody
-                a[0] = (int) (Math.random() * (500 - 250) + 250); //długości boków przeszkody
+            if (r == 1) { // losowa orientacja prostokątnej przeszkody
+                a[0] = (int) (Math.random() * (500 - 250) + 250); // długości boków przeszkody
                 b[0] = 50;
             } else {
                 a[0] = 50;
                 b[0] = (int) (Math.random() * (500 - 250) + 250);
             }
 
-           // x[0] = (int) (Math.random() * (width - 50) + 50); //grubość
-            x[0] = (int) (Math.random() * (width - 50) + 50); //grubość
+            x[0] = (int) (Math.random() * (width - 50) + 50); // wymiary
             y[0] = (int) (Math.random() * (height - 50) + 50);
-            //if ((x[0] + a[0] <= width - 50) && (y[0] + b[0] <= height - 50)) { // sprawdzenie, czy przeszkoda znajduje się w odpowiednim obszarze
-            if ((x[0] + a[0] <= width) && (y[0] + b[0] <= height - 50)) { // sprawdzenie, czy przeszkoda znajduje się w odpowiednim obszarze
-                flaga = true;
-            }
-        } while (flaga == false);
 
-        for (int i = 1; i < x.length; i++) { //pętla tworząca przeszkody/labirynt pacmana
+            if ((x[0] + a[0] <= width) && (y[0] + b[0] <= height - 250)) { // sprawdzenie, czy przeszkoda znajduje się w odpowiednim obszarze, nie zbyt nisko
+                flagDraw = true;
+            }
+
+        } while (flagDraw == false);
+
+        for (int i = 1; i < x.length; i++) { // pętla tworząca przeszkody / labirynt
             int r = (int) (Math.random() * 2);
 
-            if (r == 1) { //losowa orientacja prostokątnych przeszkód
-                a[i] = (int) (Math.random() * (500 - 250) + 250); //długości boków przeszkód
+            if (r == 1) { // losowa orientacja prostokątnych przeszkód
+                a[i] = (int) (Math.random() * (500 - 250) + 250); // długości boków przeszkód
                 b[i] = 50;
             } else {
                 a[i] = 50;
                 b[i] = (int) (Math.random() * (500 - 250) + 250);
             }
 
-            x[i] = (int) (Math.random() * (width - 50) + 50); //współrzędne przeszkody
-            y[i] = (int) (Math.random() * (width - 50) + 50);
+            x[i] = (int) (Math.random() * (width - 50) + 50); // współrzędne przeszkody
+            y[i] = (int) (Math.random() * (height - 50) + 50);
 
-            for (int j = 0; j < i; j++) { //pętla zagnieżdżona niepozwalająca na nachodzenie na siebie przeszkód i na utrzymanie ich w oknie graficznym
-                if ((x[i] + a[i] >= x[j] - 50) && (x[i] <= x[j] + 50 + a[j]) && (y[i] + b[i] >= y[j] - 50) && (y[i] <= y[j] + 50 + b[j]) || (x[i] + a[i] >= width) || (y[i] + b[i] >= height - 50)) {
+            for (int j = 0; j < i; j++) { // pętla zagnieżdżona niepozwalająca na nachodzenie na siebie przeszkód i na utrzymanie ich w oknie graficznym
+                if ((x[i] + a[i] >= x[j] - 50) && (x[i] <= x[j] + 50 + a[j]) && (y[i] + b[i] >= y[j] - 50) && (y[i] <= y[j] + 50 + b[j]) || (x[i] + a[i] >= width) || (y[i] + b[i] >= height - 250)) {
                     i--;
                     break;
                 }
             }
         }
 
-        gameView = new RectangleView(this, a, b, x, y);
+        for (int i = 0; i < pointX.length; i++) { // pętla losująca współrzędne punktów
+            pointX[i] = (int) (Math.random() * (width - 220) + 100);
+            pointY[i] = (int) (Math.random() * (height - 250) + 100);
+
+            for (int j = 0; j < x.length; j++) { // pętla zagnieżdżona niepozwalająca, by znajdowały się one na przeszkodach
+                if ((pointX[i] >= x[j] - 5) && (pointX[i] <= x[j] + a[j] + 5) && (pointY[i] >= y[j] - 5) && (pointY[i] <= y[j] + b[j] + 5)) {
+                    i--;
+                    break;
+                }
+            }
+        }
+
+        gameView = new RectangleView(this, a, b, x, y, pointX, pointY);
         // setContentView(gameView);
 
         RectangleView[] rectTable = new RectangleView[a.length];
@@ -108,10 +122,11 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     public void onSensorChanged(SensorEvent event) {
         // odczytanie bieżących wskazań
 
-        DisplayMetrics displayMetrics = new DisplayMetrics();
-        getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
-        int height = displayMetrics.heightPixels;
-        int width = displayMetrics.widthPixels;
+//        DisplayMetrics displayMetrics = new DisplayMetrics();
+//        getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+//        int height;
+//        int width;
+
 
         float timeStamp = event.timestamp; // zwracanie czasu pomiaru, ns * 10^-9
         float actualTime = timeStamp * NSS;
@@ -125,8 +140,19 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         int ay = (int) values[1];
         Log.d(TAG, String.valueOf(vx + " " + vy));
 
+        int width = gameView.getWidth();
+        int height = gameView.getHeight();
+
         vx -= ax / 3;
         vy += ay / 3;
+
+        for (int i = 0; i < pointX.length; i++) {
+            if (gameView.getBallX() >= pointX[i] - 15 && gameView.getBallX() <= pointX[i] + 15 && gameView.getBallY() >= pointY[i] - 15 && gameView.getBallY() <= pointY[i] + 15) { //jeśli pacman najedzie na punkt, punkt znika, a gracz otrzymuje punkt
+                pointX[i] = -100;
+                pointY[i] = -100;
+                score++;
+            }
+        }
 
         for (int i = 0; i < x.length; i++) { //kolizje pacmana z przeszkodami
             if (gameView.getBallX() + 15 >= x[i] && gameView.getBallX() - 15 <= x[i] + a[i] && gameView.getBallY() + 15 >= y[i] && gameView.getBallY() - 15 <= y[i] + b[i]) {
@@ -164,10 +190,12 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             gameView.setIfWon(true);
         }
 
-        if (!gameView.isIfWon()){
+        if (!gameView.isIfWon()) {
             setContentView(gameView);
-        } else if (gameView.isIfWon() && flag){
+        } else if (gameView.isIfWon() && flag) {
             setContentView(R.layout.activity_main);
+            TextView points = (TextView) findViewById(R.id.tvPoints);
+            points.setText("Score: " + score + "/30");
             flag = false;
         }
     }
