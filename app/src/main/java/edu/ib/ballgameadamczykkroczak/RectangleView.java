@@ -27,55 +27,6 @@ public class RectangleView extends View {
     private int ballY = 20;
     private boolean ifWon = false;
 
-    public void setIfWon(boolean ifWon) {
-        this.ifWon = ifWon;
-    }
-
-    public boolean isIfWon() {
-        return ifWon;
-    }
-
-
-    public int getBallX() {
-        return ballX;
-    }
-
-    public int getBallY() {
-        return ballY;
-    }
-
-    public void setBallX(int ballX) {
-        this.ballX = ballX;
-    }
-
-    public void setBallY(int ballY) {
-        this.ballY = ballY;
-    }
-
-    public void setA(int[] a) {
-        this.a = a;
-    }
-
-    public void setB(int[] b) {
-        this.b = b;
-    }
-
-    public void setX(int[] x) {
-        this.x = x;
-    }
-
-    public void setY(int[] y) {
-        this.y = y;
-    }
-
-    public int getViewWidth() {
-        return viewWidth;
-    }
-
-    public int getViewHeight() {
-        return viewHeight;
-    }
-
     public RectangleView(Context context, int[] a, int[] b, int[] x, int[] y, int[] pointX, int[] pointY) {
         super(context); // wywołanie kostruktora klasy bazowej
         this.x = x;
@@ -98,6 +49,30 @@ public class RectangleView extends View {
         ballPaint.setColor(Color.RED);
     }
 
+    public void setIfWon(boolean ifWon) {
+        this.ifWon = ifWon;
+    }
+
+    public boolean isIfWon() {
+        return ifWon;
+    }
+
+    public int getBallX() {
+        return ballX;
+    }
+
+    public int getBallY() {
+        return ballY;
+    }
+
+    public void setBallX(int ballX) {
+        this.ballX = ballX;
+    }
+
+    public void setBallY(int ballY) {
+        this.ballY = ballY;
+    }
+
     // metody do wyświetlania
     @Override
     protected void onSizeChanged(int w, int h, int oldW, int oldH) {
@@ -117,6 +92,7 @@ public class RectangleView extends View {
             canvas.drawRect(rect, rectPaint);
         }
 
+        // punkty
         for (int i = 0; i < pointX.length; i++) {
             canvas.drawCircle(pointX[i], pointY[i], radiusDiamond, diamondPaint);
         }
@@ -125,10 +101,6 @@ public class RectangleView extends View {
 
         // punkt końcowy
         canvas.drawRect((viewWidth - 100), (viewHeight - 100), (viewWidth - 50), (viewHeight - 50), finishPaint);
-
-        // start
-        //rectPaint.setTextSize(32);
-        //canvas.drawText("START", 20, 30, rectPaint);
 
         // piłka
         canvas.drawCircle(ballX, ballY, radius, ballPaint);
