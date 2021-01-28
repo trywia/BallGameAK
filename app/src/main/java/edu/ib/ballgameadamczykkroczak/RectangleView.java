@@ -17,12 +17,18 @@ public class RectangleView extends View {
     private int[] y;
     private int viewWidth; // szerokość ekranu
     private int viewHeight; // wysokość ekranu
-    private long lastTime;
     private int radius = 15;
     private int ballX = 50;
     private int ballY = 50;
-    private Context context;
-    private TextView tvEnd;
+    private boolean ifWon = false;
+
+    public void setIfWon(boolean ifWon) {
+        this.ifWon = ifWon;
+    }
+
+    public boolean isIfWon() {
+        return ifWon;
+    }
 
     public int getBallX() {
         return ballX;
@@ -81,7 +87,6 @@ public class RectangleView extends View {
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
-        // tvEnd = new TextView(super(context));
 
         for (int i = 0; i < a.length; i++) {
             Rect rect = new Rect(x[i], y[i], x[i] + a[i], y[i] + b[i]);
@@ -96,6 +101,7 @@ public class RectangleView extends View {
         canvas.drawText("START", 20, 30, rectPaint);
 
         canvas.drawCircle(ballX, ballY, radius, ballPaint);
+
         invalidate(); // odświeżenie ekranu
     }
 }

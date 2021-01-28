@@ -2,6 +2,7 @@ package edu.ib.ballgameadamczykkroczak;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.Rect;
 import android.hardware.Sensor;
@@ -11,6 +12,7 @@ import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.view.View;
 import android.widget.TextView;
 
 import java.util.Random;
@@ -27,13 +29,14 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     private float vy = 0;
     private int px = 50;
     private int py = 50;
+    boolean flag = true;
     private static final String TAG = "EDUIB"; // tag
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        setContentView(R.layout.activity_main);
+        // setContentView(R.layout.activity_main);
 
         sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
         // chęć korzystania z czujników sprzętowych
@@ -57,9 +60,11 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                 b[0] = (int) (Math.random() * (500 - 250) + 250);
             }
 
+           // x[0] = (int) (Math.random() * (width - 50) + 50); //grubość
             x[0] = (int) (Math.random() * (width - 50) + 50); //grubość
             y[0] = (int) (Math.random() * (height - 50) + 50);
-            if ((x[0] + a[0] <= width - 50) && (y[0] + b[0] <= height - 50)) { // sprawdzenie, czy przeszkoda znajduje się w odpowiednim obszarze
+            //if ((x[0] + a[0] <= width - 50) && (y[0] + b[0] <= height - 50)) { // sprawdzenie, czy przeszkoda znajduje się w odpowiednim obszarze
+            if ((x[0] + a[0] <= width) && (y[0] + b[0] <= height - 50)) { // sprawdzenie, czy przeszkoda znajduje się w odpowiednim obszarze
                 flaga = true;
             }
         } while (flaga == false);
@@ -79,7 +84,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             y[i] = (int) (Math.random() * (width - 50) + 50);
 
             for (int j = 0; j < i; j++) { //pętla zagnieżdżona niepozwalająca na nachodzenie na siebie przeszkód i na utrzymanie ich w oknie graficznym
-                if ((x[i] + a[i] >= x[j] - 50) && (x[i] <= x[j] + 50 + a[j]) && (y[i] + b[i] >= y[j] - 50) && (y[i] <= y[j] + 50 + b[j]) || (x[i] + a[i] >= width - 50) || (y[i] + b[i] >= height - 50)) {
+                if ((x[i] + a[i] >= x[j] - 50) && (x[i] <= x[j] + 50 + a[j]) && (y[i] + b[i] >= y[j] - 50) && (y[i] <= y[j] + 50 + b[j]) || (x[i] + a[i] >= width) || (y[i] + b[i] >= height - 50)) {
                     i--;
                     break;
                 }
@@ -103,9 +108,6 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     public void onSensorChanged(SensorEvent event) {
         // odczytanie bieżących wskazań
 
-        TextView tvEnd = (TextView) findViewById(R.id.tvText);
-        tvEnd.setText("");
-
         DisplayMetrics displayMetrics = new DisplayMetrics();
         getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
         int height = displayMetrics.heightPixels;
@@ -128,18 +130,16 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
         for (int i = 0; i < x.length; i++) { //kolizje pacmana z przeszkodami
             if (gameView.getBallX() + 15 >= x[i] && gameView.getBallX() - 15 <= x[i] + a[i] && gameView.getBallY() + 15 >= y[i] && gameView.getBallY() - 15 <= y[i] + b[i]) {
-//                if (Math.abs(values[0]) > Math.abs(values[1])) {
-//                    vx -= 1.5 * vx; //-vx * (float) 1.5; // -vx * 4;
-//                    gameView.setBallX(px);
-//                } else if (Math.abs(values[0]) < Math.abs(values[1])) {
-//                    vy -= 1.5 * vy; //-vy * (float) 1.5; // -vy * 4;
-//                    gameView.setBallY(py);
-//                } else {
-                vx -= 1.1 * vx; //-vx * (float) 1.5; // -vx * 4;
-                gameView.setBallX(px);
-                vy -= 1.1 * vy; //-vy * (float) 1.5; // -vy * 4;
+                if (px + 15 >= x[i] && px - 15 <= x[i] + a[i]) {
+                    vy -= 1.5 * vy;
+                } else if (py + 15 >= y[i] && py - 15 <= y[i] + b[i]) {
+                    vx -= 1.5 * vx;
+                } else {
+                    vx -= 1.5 * vx;
+                    vy -= 1.5 * vy;
+                }
                 gameView.setBallY(py);
-//                }
+                gameView.setBallX(px);
             }
         }
 
@@ -161,11 +161,15 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         // (viewWidth - 100), (viewHeight - 100), (viewWidth - 50), (viewHeight - 50)
 
         if (gameView.getBallX() + 15 >= (width - 100) && gameView.getBallX() - 15 <= (width - 50) && gameView.getBallY() + 15 >= (height - 100) && gameView.getBallY() - 15 <= (height - 50)) {
-            tvEnd.setText("chuj");
+            gameView.setIfWon(true);
         }
 
-
-        setContentView(gameView);
+        if (!gameView.isIfWon()){
+            setContentView(gameView);
+        } else if (gameView.isIfWon() && flag){
+            setContentView(R.layout.activity_main);
+            flag = false;
+        }
     }
 
     // metody decydujące o tym, że nie sprawdzamy czujników, kiedy aplikacja nie jest użytkowana
@@ -186,5 +190,13 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     @Override
     public void onAccuracyChanged(Sensor sensor, int accuracy) {
 
+    }
+
+    public void onBtnRestartClick(View view) {
+        if (gameView.isIfWon()) {
+            Intent intent = getIntent();
+            finish();
+            startActivity(intent);
+        }
     }
 }
